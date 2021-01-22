@@ -32,8 +32,9 @@ class ThoughtsListViewTest(TestCase):
 
     def test_should_publish_a_thought(self):
         data = {'thought': '''Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus in lectus vitae elit congue interdum sed ut quam. Vivamus at lectus lacus. Proin fringilla porta sapien, vel scelerisque quam aliquet at. Integer faucibus justo nibh, sodales placerat eros consectetur sed. Praesent ultrices felis arcu, at luctus turpis auctor fermentum.'''}
+        url = reverse('thought-list')
 
-        response = self.client.post('/thoughts/', data, format='json')
+        response = self.client.post(url, data, format='json')
 
         self.assertEqual(status.HTTP_201_CREATED, response.status_code)
         self.assertEqual(1, Thought.objects.count())
@@ -42,8 +43,9 @@ class ThoughtsListViewTest(TestCase):
 
     def test_should_no_publish_a_thought_bigger_than_800_characters(self):
         data = {'thought': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus in lectus vitae elit congue interdum sed ut quam. Vivamus at lectus lacus. Proin fringilla porta sapien, vel scelerisque quam aliquet at. Integer faucibus justo nibh, sodales placerat eros consectetur sed. Praesent ultrices felis arcu, at luctus turpis auctor fermentum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus in lectus vitae elit congue interdum sed ut quam. Vivamus at lectus lacus. Proin fringilla porta sapien, vel scelerisque quam aliquet at. Integer faucibus justo nibh, sodales placerat eros consectetur sed. Praesent ultrices felis arcu, at luctus turpis auctor fermentum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus in lectus vitae elit congue interdum sed ut quam. Vivamus at lectus lacus. Proin fringilla porta sapien, vel scelerisque quam aliquet at. Integer faucibus justo nibh, sodales placerat eros consectetur sed. Praesent ultrices felis arcu, at luctus turpis auctor fermentum.'}
+        url = reverse('thought-list')
 
-        response = self.client.post('/thoughts/', data, format='json')
+        response = self.client.post(url, data, format='json')
 
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
         self.assertEqual(0, Thought.objects.count())
