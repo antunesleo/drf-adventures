@@ -1,6 +1,7 @@
 
 # Create your tests here.
 from datetime import datetime
+from typing import Union
 
 from django.test import TestCase
 from rest_framework import status
@@ -11,7 +12,9 @@ from sharethoughts.models import Thought
 
 
 def create_thought(thought: str) -> Thought:
-    return Thought(thought=thought)
+    thought = Thought(thought=thought)
+    thought.save()
+    return thought
 
 
 class ThoughtsListViewTest(TestCase):
@@ -22,13 +25,22 @@ class ThoughtsListViewTest(TestCase):
     def assert_thought(
       self,
       expected_thought: str,
-      actual_thought: Thought
+      actual_thought: Union[Thought, dict]
     ):
-        self.assertEqual(expected_thought, actual_thought.thought)
-        self.assertEqual(
-            datetime.today().strftime('%Y-%m-%d'),
-            actual_thought.created_at.strftime('%Y-%m-%d'),
-        )
+        if isinstance(actual_thought, dict):
+            self.assertEqual(expected_thought, actual_thought['thought'])
+            self.assertEqual(
+                datetime.today().strftime('%Y-%m-%d'),
+                actual_thought['created_at'][0:10],
+            )
+        elif isinstance(actual_thought, Thought):
+            self.assertEqual(expected_thought, actual_thought.thought)
+            self.assertEqual(
+                datetime.today().strftime('%Y-%m-%d'),
+                actual_thought.created_at.strftime('%Y-%m-%d'),
+            )
+        else:
+            raise TypeError('atual_thought must be instance of Thought or dict')
 
     def test_should_publish_a_thought(self):
         data = {'thought': '''Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus in lectus vitae elit congue interdum sed ut quam. Vivamus at lectus lacus. Proin fringilla porta sapien, vel scelerisque quam aliquet at. Integer faucibus justo nibh, sodales placerat eros consectetur sed. Praesent ultrices felis arcu, at luctus turpis auctor fermentum.'''}
@@ -49,3 +61,15 @@ class ThoughtsListViewTest(TestCase):
 
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
         self.assertEqual(0, Thought.objects.count())
+
+    def test_should_list_all_thoughts(self):
+        create_thought('Lorem ipsum dolor sit amet')
+        create_thought('consectetur adipiscing elit.')
+
+        url = reverse('thought-list')
+
+        response = self.client.get(url, format='json')
+
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assert_thought('Lorem ipsum dolor sit amet', response.data[0])
+        self.assert_thought('consectetur adipiscing elit.', response.data[1])

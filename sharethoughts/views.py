@@ -5,6 +5,7 @@ from sharethoughts.serializers import ThoughtSerializer
 
 
 class ThoughtViewSet(mixins.CreateModelMixin,
+                     mixins.ListModelMixin,
                      viewsets.GenericViewSet):
     queryset = Thought.objects.all()
     serializer_class = ThoughtSerializer
