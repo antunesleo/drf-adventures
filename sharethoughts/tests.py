@@ -13,8 +13,9 @@ from rest_framework.test import APIClient
 from sharethoughts.models import Thought
 
 
-def create_thought(thought: str) -> Thought:
-    thought = Thought(thought=thought)
+def create_thought(thought: str, username: str) -> Thought:
+    user = User.objects.get(username=username)
+    thought = Thought(thought=thought, owner=user)
     thought.save()
     return thought
 
@@ -86,8 +87,8 @@ class ThoughtViewSetTest(TestCase):
         self.assertEqual(0, Thought.objects.count())
 
     def test_should_list_all_thoughts(self):
-        create_thought('Lorem ipsum dolor sit amet')
-        create_thought('consectetur adipiscing elit.')
+        create_thought('Lorem ipsum dolor sit amet', self.auth_user['username'])
+        create_thought('consectetur adipiscing elit.', self.auth_user['username'])
 
         url = reverse('thought-list')
 

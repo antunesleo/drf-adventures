@@ -10,3 +10,7 @@ class ThoughtSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ['thought', 'created_at']
         model = Thought
+
+    def create(self, validated_data):
+        validated_data['owner'] = self.context['request'].user
+        return super(ThoughtSerializer, self).create(validated_data)
