@@ -1,7 +1,6 @@
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from rest_framework import mixins, viewsets, status
-from rest_framework.exceptions import bad_request
 
 from iam.exceptions import UsernameError, EmailError
 from iam.serializers import UserSerializer
