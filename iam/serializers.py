@@ -27,7 +27,7 @@ class UserSerializer(serializers.ModelSerializer):
             email = validated_data['email']
             raise EmailError(f'the email {email} is already in use')
 
-        validated_data['password'] = make_password(
-            validated_data.get('password')
-        )
-        return super(UserSerializer, self).create(validated_data)
+        user = super(UserSerializer, self).create(validated_data)
+        user.set_password(validated_data['password'])
+        user.save()
+        return user
