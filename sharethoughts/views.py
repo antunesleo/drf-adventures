@@ -9,5 +9,3 @@ class ThoughtViewSet(mixins.CreateModelMixin,
                      viewsets.GenericViewSet):
     queryset = Thought.objects.all()
     serializer_class = ThoughtSerializer
-
-# Create your views here.

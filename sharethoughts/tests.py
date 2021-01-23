@@ -3,6 +3,7 @@
 from datetime import datetime
 from typing import Union
 
+from django.contrib.auth.models import User
 from django.test import TestCase
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -17,7 +18,7 @@ def create_thought(thought: str) -> Thought:
     return thought
 
 
-class ThoughtsListViewTest(TestCase):
+class ThoughtViewSetTest(TestCase):
 
     def setUp(self) -> None:
         self.client = APIClient()
