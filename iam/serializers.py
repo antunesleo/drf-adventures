@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from rest_framework import serializers
 
 from iam.exceptions import UsernameError, EmailError
+from iam.tasks import send_confirmation_email
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -29,4 +30,5 @@ class UserSerializer(serializers.ModelSerializer):
         user = super(UserSerializer, self).create(validated_data)
         user.set_password(validated_data['password'])
         user.save()
+        send_confirmation_email(user.email)
         return user
