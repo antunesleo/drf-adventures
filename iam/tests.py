@@ -77,26 +77,14 @@ class UserViewSetTest(TestCase):
         persisted_user = User.objects.get()
         self.assert_persisted_user(user_data, persisted_user)
 
-    # TODO: Use user dataset
     def test_should_not_register_a_new_user_if_username_in_use(self):
-        user_data = {
-            'first_name': 'Breno',
-            'last_name': 'Brenudo',
-            'username': 'breno',
-            'email': 'breno@breno.com',
-            'password': '123456'
-        }
-        create_user(user_data)
+        first_user_data = get_test_user(0)
+        second_user_data = get_test_user(1)
+        second_user_data['username'] = first_user_data['username']
+        create_user(first_user_data)
         url = reverse('user-list')
-        user_data = {
-            'first_name': 'Breno',
-            'last_name': 'Brenudo',
-            'username': 'breno',
-            'email': 'breno2@breno.com',
-            'password': '123456'
-        }
 
-        response = self.client.post(url, user_data, format='json')
+        response = self.client.post(url, second_user_data, format='json')
 
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
 
