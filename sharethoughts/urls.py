@@ -1,6 +1,11 @@
-from rest_framework.routers import DefaultRouter
-from sharethoughts.views import ThoughtViewSet
+from django.urls import path
 
-router = DefaultRouter()
-router.register(r'thoughts', ThoughtViewSet)
-urlpatterns = router.urls
+from sharethoughts.views import ThoughtListView
+
+urlpatterns = [
+    path(
+        'thoughts',
+        ThoughtListView.as_view(),
+        name='thought-list'
+    )
+]

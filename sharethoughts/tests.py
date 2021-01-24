@@ -3,7 +3,6 @@
 from datetime import datetime
 from typing import Union
 
-from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 from django.test import TestCase
 from rest_framework import status
@@ -31,9 +30,12 @@ class ThoughtViewSetTest(TestCase):
             'email': 'breno@breno.com',
             'password': '123456'
         }
+        self.auth_user = self.create_user(user_data)
+
+    def create_user(self, user_data: dict) -> dict:
         url = reverse('user-list')
         response = self.client.post(url, user_data, format='json')
-        self.auth_user = response.data
+        return response.data
 
     def obtain_and_configure_access_token(self):
         credentials = {
@@ -86,14 +88,29 @@ class ThoughtViewSetTest(TestCase):
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
         self.assertEqual(0, Thought.objects.count())
 
-    def test_should_list_all_thoughts(self):
-        create_thought('Lorem ipsum dolor sit amet', self.auth_user['username'])
-        create_thought('consectetur adipiscing elit.', self.auth_user['username'])
+    def test_should_list_user_thoughts(self):
+        extra_user = self.create_user({
+            'first_name': 'Extra',
+            'last_name': 'User',
+            'username': 'extra',
+            'email': 'extra@user.com',
+            'password': '123456'
+        })
+        create_thought('Adipiscing ipsum dolor sit.', extra_user['username'])
+        create_thought('Lorem ipsum dolor sit.', self.auth_user['username'])
+        create_thought('consectetur adipiscing.', self.auth_user['username'])
 
-        url = reverse('thought-list')
-
-        response = self.client.get(url, format='json')
+        response = self.client.get(
+            reverse('thought-list'),
+            {'username': self.auth_user['username']},
+            format='json'
+        )
 
         self.assertEqual(status.HTTP_200_OK, response.status_code)
-        self.assert_thought('Lorem ipsum dolor sit amet', response.data[0])
-        self.assert_thought('consectetur adipiscing elit.', response.data[1])
+        self.assertEqual(len( response.data), 2)
+        self.assert_thought('Lorem ipsum dolor sit.', response.data[0])
+        self.assert_thought('consectetur adipiscing.', response.data[1])
+
+    def test_should_not_list_thoughts_if_user_filter_is_missing(self):
+        response = self.client.get(reverse('thought-list'), format='json')
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)

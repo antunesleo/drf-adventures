@@ -77,6 +77,7 @@ class UserViewSetTest(TestCase):
         persisted_user = User.objects.get()
         self.assert_persisted_user(user_data, persisted_user)
 
+    # TODO: Use user dataset
     def test_should_not_register_a_new_user_if_username_in_use(self):
         user_data = {
             'first_name': 'Breno',
