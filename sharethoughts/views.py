@@ -1,4 +1,6 @@
 from django.http import JsonResponse
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
@@ -32,3 +34,7 @@ class ThoughtDetailView(generics.RetrieveAPIView):
     queryset = Thought.objects.all()
     serializer_class = ThoughtSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
+
+    @method_decorator(cache_page(60 * 60 * 2))
+    def get(self, request, pk, format=None):
+        return super(ThoughtDetailView, self).get(request, pk, format)
