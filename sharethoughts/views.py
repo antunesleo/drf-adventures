@@ -26,3 +26,9 @@ class ThoughtListView(generics.ListCreateAPIView):
         if username is not None:
             return Thought.objects.filter(owner__username=username)
         raise UsernameError('fdsfjsda')
+
+
+class ThoughtDetailView(generics.RetrieveAPIView):
+    queryset = Thought.objects.all()
+    serializer_class = ThoughtSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]

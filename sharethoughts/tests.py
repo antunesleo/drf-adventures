@@ -128,3 +128,24 @@ class ThoughtViewSetTest(TestCase):
     def test_should_not_list_thoughts_if_user_filter_is_missing(self):
         response = self.client.get(reverse('thought-list'), format='json')
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
+
+    def test_should_read_thought(self):
+        thought = create_thought(
+            'Adipiscing ipsum dolor sit.',
+            self.auth_user['username']
+        )
+
+        response = self.client.get(
+            reverse('thought-detail', kwargs={'pk': thought.id}),
+            {'username': self.auth_user['username']},
+            format='json'
+        )
+
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assert_thought(
+            {
+                'thought': 'Adipiscing ipsum dolor sit.',
+                'username': self.auth_user['username']
+            },
+            response.data
+        )
