@@ -48,17 +48,19 @@ class ThoughtViewSetTest(TestCase):
 
     def assert_thought(
       self,
-      expected_thought: str,
+      expected_thought: dict,
       actual_thought: Union[Thought, dict]
     ):
         if isinstance(actual_thought, dict):
-            self.assertEqual(expected_thought, actual_thought['thought'])
+            self.assertEqual(expected_thought['thought'], actual_thought['thought'])
+            self.assertEqual(expected_thought['username'], actual_thought['username'])
             self.assertEqual(
                 datetime.today().strftime('%Y-%m-%d'),
                 actual_thought['created_at'][0:10],
             )
         elif isinstance(actual_thought, Thought):
-            self.assertEqual(expected_thought, actual_thought.thought)
+            self.assertEqual(expected_thought['thought'], actual_thought.thought)
+            self.assertEqual(expected_thought['username'], actual_thought.owner.username)
             self.assertEqual(
                 datetime.today().strftime('%Y-%m-%d'),
                 actual_thought.created_at.strftime('%Y-%m-%d'),
@@ -76,7 +78,7 @@ class ThoughtViewSetTest(TestCase):
         self.assertEqual(status.HTTP_201_CREATED, response.status_code)
         self.assertEqual(1, Thought.objects.count())
         thought = Thought.objects.get()
-        self.assert_thought(data['thought'], thought)
+        self.assert_thought(response.data, thought)
 
     def test_should_no_publish_a_thought_bigger_than_800_characters(self):
         self.obtain_and_configure_access_token()
@@ -108,8 +110,20 @@ class ThoughtViewSetTest(TestCase):
 
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         self.assertEqual(len( response.data), 2)
-        self.assert_thought('Lorem ipsum dolor sit.', response.data[0])
-        self.assert_thought('consectetur adipiscing.', response.data[1])
+        self.assert_thought(
+            {
+                'thought': 'Lorem ipsum dolor sit.',
+                'username': self.auth_user['username']
+            },
+            response.data[0]
+        )
+        self.assert_thought(
+            {
+                'thought': 'consectetur adipiscing.',
+                'username': self.auth_user['username']
+            },
+            response.data[1]
+        )
 
     def test_should_not_list_thoughts_if_user_filter_is_missing(self):
         response = self.client.get(reverse('thought-list'), format='json')
