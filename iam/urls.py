@@ -4,19 +4,20 @@ from rest_framework_simplejwt import views as jwt_views
 from rest_framework_simplejwt import authentication
 
 from iam import views
-from iam.views import UserViewSet
+from iam.views import UserListViewSet, UserDetailViewSet
 
 router = DefaultRouter()
-router.register(r'users', UserViewSet)
+router.register(r'api/users', UserListViewSet)
+router.register(r'api/users', UserDetailViewSet)
 
 urlpatterns = [
     path(
-        'token',
+        'api/token',
         jwt_views.TokenObtainPairView.as_view(),
         name='token_obtain_pair'
     ),
     path(
-        'token/refresh',
+        'api/token/refresh',
         jwt_views.TokenRefreshView.as_view(),
         name='token_refresh'
     ),

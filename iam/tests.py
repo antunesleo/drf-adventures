@@ -66,6 +66,15 @@ class UserViewSetTest(TestCase):
         self.assertEqual(78, len(actual.password))
         self.assertTrue(is_password_usable(actual.password))
 
+    def obtain_and_configure_access_token(self, user: dict):
+        credentials = {
+            'username': user['username'],
+            'password': '123456'
+        }
+        url = reverse('token_obtain_pair')
+        response = self.client.post(url, credentials, format='json')
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {response.data["access"]}')
+
     def test_should_register_new_user(self):
         user_data = get_test_user(0)
         url = reverse('user-list')
@@ -98,6 +107,32 @@ class UserViewSetTest(TestCase):
         response = self.client.post(url, second_user_data, format='json')
 
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
+
+    def test_should_get_user_info(self):
+        user_data = get_test_user(0)
+        url = reverse('user-detail', kwargs={'pk': create_user(user_data).id})
+        self.obtain_and_configure_access_token(user_data)
+
+        response = self.client.get(url, format='json')
+
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assert_response_user(response.data, user_data)
+
+    def test_should_not_get_user_info_when_not_authenticated(self):
+        url = reverse('user-detail', kwargs={'pk': 1})
+        response = self.client.get(url, format='json')
+        self.assertEqual(status.HTTP_401_UNAUTHORIZED, response.status_code)
+
+    def test_authenticated_user_should_not_see_info_from_another_user(self):
+        user_data = get_test_user(0)
+        create_user(user_data)
+        self.obtain_and_configure_access_token(user_data)
+        other_user = create_user(get_test_user(1))
+        url = reverse('user-detail', kwargs={'pk': other_user.id})
+
+        response = self.client.get(url, format='json')
+
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
 
 
 class TokenObtainPairViewTest(TestCase):

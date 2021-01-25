@@ -109,20 +109,20 @@ class ThoughtViewSetTest(TestCase):
         )
 
         self.assertEqual(status.HTTP_200_OK, response.status_code)
-        self.assertEqual(len( response.data), 2)
+        self.assertEqual(len(response.data['results']), 2)
         self.assert_thought(
             {
                 'thought': 'Lorem ipsum dolor sit.',
                 'username': self.auth_user['username']
             },
-            response.data[0]
+            response.data['results'][0]
         )
         self.assert_thought(
             {
                 'thought': 'consectetur adipiscing.',
                 'username': self.auth_user['username']
             },
-            response.data[1]
+            response.data['results'][1]
         )
 
     def test_should_not_list_thoughts_if_user_filter_is_missing(self):
