@@ -9,6 +9,7 @@ from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
 from common.testing.builders import UserBuilder
+from common.testing.testcase_mixins import AuthenticableTestMixin
 
 
 class TokenCaseMixin(TestCase):
@@ -19,7 +20,7 @@ class TokenCaseMixin(TestCase):
         self.assertEqual(len(access_token.split('.')), 3)
 
 
-class UserViewSetTest(TestCase):
+class UserViewSetTest(AuthenticableTestMixin):
 
     def setUp(self) -> None:
         self.client = APIClient()
@@ -45,15 +46,6 @@ class UserViewSetTest(TestCase):
         self.assertEqual(expected['email'], actual.email)
         self.assertEqual(78, len(actual.password))
         self.assertTrue(is_password_usable(actual.password))
-
-    def obtain_and_configure_access_token(self, username: str, password: str):
-        url = reverse('token_obtain_pair')
-        response = self.client.post(
-            url,
-            {'username': username, 'password': password},
-            format='json'
-        )
-        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {response.data["access"]}')
 
     def test_should_register_new_user(self):
         user_data = UserBuilder().with_username('breno')\
@@ -120,7 +112,7 @@ class UserViewSetTest(TestCase):
                             .build()
         user.save()
         url = reverse('user-detail', kwargs={'pk': user.id})
-        self.obtain_and_configure_access_token(user.username, '123456')
+        self.authenticate_user(user, '123456')
 
         response = self.client.get(url, format='json')
 
@@ -140,7 +132,7 @@ class UserViewSetTest(TestCase):
                             .with_email('breno@breno.com')\
                             .build()
         user.save()
-        self.obtain_and_configure_access_token(user.username, '123456')
+        self.authenticate_user(user, '123456')
         other_user = UserBuilder().with_username('breno2')\
                                   .with_password('123456')\
                                   .with_first_name('Breno2')\
