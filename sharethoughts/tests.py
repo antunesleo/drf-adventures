@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import Union
 
 from django.contrib.auth.models import User
@@ -60,7 +59,14 @@ class ThoughtViewSetTest(ThoughtCaseMixin, AuthenticableTestMixin):
         super(ThoughtViewSetTest, self).setUp()
 
     def test_should_publish_a_thought(self):
-        self.obtain_and_configure_access_token()
+        user = UserBuilder().with_first_name('Bren') \
+                            .with_last_name('Magro') \
+                            .with_username('breninho') \
+                            .with_email('brenoninho@breno.com') \
+                            .with_password('123456') \
+                            .build()
+        user.save()
+        self.authenticate_user(user, '123456')
         data = {'thought': '''Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus in lectus vitae elit congue interdum sed ut quam. Vivamus at lectus lacus. Proin fringilla porta sapien, vel scelerisque quam aliquet at. Integer faucibus justo nibh, sodales placerat eros consectetur sed. Praesent ultrices felis arcu, at luctus turpis auctor fermentum.'''}
 
         url = reverse('thought-list')
@@ -71,7 +77,7 @@ class ThoughtViewSetTest(ThoughtCaseMixin, AuthenticableTestMixin):
         self.assertEqual(1, Thought.objects.count())
         expected_thought = {
             'thought': data['thought'],
-            'username': self.auth_user.username
+            'username': user.username
         }
         self.assert_thought(
             expected_thought,
@@ -81,7 +87,14 @@ class ThoughtViewSetTest(ThoughtCaseMixin, AuthenticableTestMixin):
         self.assert_thought(expected_thought, thought)
 
     def test_should_no_publish_a_thought_bigger_than_800_characters(self):
-        self.obtain_and_configure_access_token()
+        user = UserBuilder().with_first_name('Bren') \
+                            .with_last_name('Magro') \
+                            .with_username('breninho') \
+                            .with_email('brenoninho@breno.com') \
+                            .with_password('123456') \
+                            .build()
+        user.save()
+        self.authenticate_user(user, '123456')
         data = {'thought': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus in lectus vitae elit congue interdum sed ut quam. Vivamus at lectus lacus. Proin fringilla porta sapien, vel scelerisque quam aliquet at. Integer faucibus justo nibh, sodales placerat eros consectetur sed. Praesent ultrices felis arcu, at luctus turpis auctor fermentum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus in lectus vitae elit congue interdum sed ut quam. Vivamus at lectus lacus. Proin fringilla porta sapien, vel scelerisque quam aliquet at. Integer faucibus justo nibh, sodales placerat eros consectetur sed. Praesent ultrices felis arcu, at luctus turpis auctor fermentum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus in lectus vitae elit congue interdum sed ut quam. Vivamus at lectus lacus. Proin fringilla porta sapien, vel scelerisque quam aliquet at. Integer faucibus justo nibh, sodales placerat eros consectetur sed. Praesent ultrices felis arcu, at luctus turpis auctor fermentum.'}
         url = reverse('thought-list')
 
@@ -95,7 +108,7 @@ class ThoughtViewSetTest(ThoughtCaseMixin, AuthenticableTestMixin):
                                   .with_last_name('Magro') \
                                   .with_username('breninho') \
                                   .with_email('brenoninho@breno.com') \
-                                  .with_password(self.password) \
+                                  .with_password('123456') \
                                   .build()
         first_user.save()
         second_user = UserBuilder().with_first_name('Extra')\
