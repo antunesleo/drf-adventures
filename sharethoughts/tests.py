@@ -91,30 +91,37 @@ class ThoughtViewSetTest(ThoughtCaseMixin, AuthenticableTestMixin):
         self.assertEqual(0, Thought.objects.count())
 
     def test_should_list_user_thoughts(self):
-        extra_user = UserBuilder().with_first_name('Extra')\
+        first_user = UserBuilder().with_first_name('Bren') \
+                                  .with_last_name('Magro') \
+                                  .with_username('breninho') \
+                                  .with_email('brenoninho@breno.com') \
+                                  .with_password(self.password) \
+                                  .build()
+        first_user.save()
+        second_user = UserBuilder().with_first_name('Extra')\
                                   .with_last_name('User')\
                                   .with_username('extra')\
                                   .with_email('extra@user.com')\
                                   .with_password('123456')\
                                   .build()
-        extra_user.save()
+        second_user.save()
 
         thought = ThoughtBuilder().with_thought('Adipiscing ipsum dolor sit.')\
-                                  .with_owner(extra_user)\
+                                  .with_owner(first_user)\
                                   .build()
         thought.save()
         thought = ThoughtBuilder().with_thought('Lorem ipsum dolor sit.')\
-                                  .with_owner(self.auth_user)\
+                                  .with_owner(second_user)\
                                   .build()
         thought.save()
         thought = ThoughtBuilder().with_thought('consectetur adipiscing.')\
-                                  .with_owner(self.auth_user)\
+                                  .with_owner(second_user)\
                                   .build()
         thought.save()
 
         response = self.client.get(
             reverse('thought-list'),
-            {'username': self.auth_user.username},
+            {'username': second_user.username},
             format='json'
         )
 
@@ -123,14 +130,14 @@ class ThoughtViewSetTest(ThoughtCaseMixin, AuthenticableTestMixin):
         self.assert_thought(
             {
                 'thought': 'Lorem ipsum dolor sit.',
-                'username': self.auth_user.username
+                'username': second_user.username
             },
             response.data['results'][0]
         )
         self.assert_thought(
             {
                 'thought': 'consectetur adipiscing.',
-                'username': self.auth_user.username
+                'username': second_user.username
             },
             response.data['results'][1]
         )
@@ -140,14 +147,21 @@ class ThoughtViewSetTest(ThoughtCaseMixin, AuthenticableTestMixin):
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
 
     def test_should_read_thought(self):
+        user = UserBuilder().with_first_name('Bren') \
+                                  .with_last_name('Magro') \
+                                  .with_username('breninho') \
+                                  .with_email('brenoninho@breno.com') \
+                                  .with_password('123456') \
+                                  .build()
+        user.save()
         thought = ThoughtBuilder().with_thought('Adipiscing ipsum dolor sit.')\
-                                  .with_owner(self.auth_user)\
+                                  .with_owner(user)\
                                   .build()
         thought.save()
 
         response = self.client.get(
             reverse('thought-detail', kwargs={'pk': thought.id}),
-            {'username': self.auth_user.username},
+            {'username': user.username},
             format='json'
         )
 
@@ -155,7 +169,7 @@ class ThoughtViewSetTest(ThoughtCaseMixin, AuthenticableTestMixin):
         self.assert_thought(
             {
                 'thought': 'Adipiscing ipsum dolor sit.',
-                'username': self.auth_user.username
+                'username': user.username
             },
             response.data
         )
