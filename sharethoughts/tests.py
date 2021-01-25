@@ -1,5 +1,3 @@
-
-# Create your tests here.
 from datetime import datetime
 from typing import Union
 
@@ -12,14 +10,38 @@ from rest_framework.test import APIClient
 from sharethoughts.models import Thought
 
 
-def create_thought(thought: str, username: str) -> Thought:
-    user = User.objects.get(username=username)
-    thought = Thought(thought=thought, owner=user)
-    thought.save()
-    return thought
+class ThoughtCaseMixin(TestCase):
+
+    def create_thought(self, thought: str, username: str) -> Thought:
+        user = User.objects.get(username=username)
+        thought = Thought(thought=thought, owner=user)
+        thought.save()
+        return thought
+
+    def assert_thought(
+      self,
+      expected_thought: dict,
+      actual_thought: Union[Thought, dict]
+    ):
+        if isinstance(actual_thought, dict):
+            self.assertEqual(expected_thought['thought'], actual_thought['thought'])
+            self.assertEqual(expected_thought['username'], actual_thought['username'])
+            self.assertEqual(
+                datetime.today().strftime('%Y-%m-%d'),
+                actual_thought['created_at'][0:10],
+            )
+        elif isinstance(actual_thought, Thought):
+            self.assertEqual(expected_thought['thought'], actual_thought.thought)
+            self.assertEqual(expected_thought['username'], actual_thought.owner.username)
+            self.assertEqual(
+                datetime.today().strftime('%Y-%m-%d'),
+                actual_thought.created_at.strftime('%Y-%m-%d'),
+            )
+        else:
+            raise TypeError('atual_thought must be instance of Thought or dict')
 
 
-class ThoughtViewSetTest(TestCase):
+class ThoughtViewSetTest(ThoughtCaseMixin):
 
     def setUp(self) -> None:
         self.client = APIClient()
@@ -45,28 +67,6 @@ class ThoughtViewSetTest(TestCase):
         url = reverse('token_obtain_pair')
         response = self.client.post(url, credentials, format='json')
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {response.data["access"]}')
-
-    def assert_thought(
-      self,
-      expected_thought: dict,
-      actual_thought: Union[Thought, dict]
-    ):
-        if isinstance(actual_thought, dict):
-            self.assertEqual(expected_thought['thought'], actual_thought['thought'])
-            self.assertEqual(expected_thought['username'], actual_thought['username'])
-            self.assertEqual(
-                datetime.today().strftime('%Y-%m-%d'),
-                actual_thought['created_at'][0:10],
-            )
-        elif isinstance(actual_thought, Thought):
-            self.assertEqual(expected_thought['thought'], actual_thought.thought)
-            self.assertEqual(expected_thought['username'], actual_thought.owner.username)
-            self.assertEqual(
-                datetime.today().strftime('%Y-%m-%d'),
-                actual_thought.created_at.strftime('%Y-%m-%d'),
-            )
-        else:
-            raise TypeError('atual_thought must be instance of Thought or dict')
 
     def test_should_publish_a_thought(self):
         self.obtain_and_configure_access_token()
@@ -98,9 +98,9 @@ class ThoughtViewSetTest(TestCase):
             'email': 'extra@user.com',
             'password': '123456'
         })
-        create_thought('Adipiscing ipsum dolor sit.', extra_user['username'])
-        create_thought('Lorem ipsum dolor sit.', self.auth_user['username'])
-        create_thought('consectetur adipiscing.', self.auth_user['username'])
+        self.create_thought('Adipiscing ipsum dolor sit.', extra_user['username'])
+        self.create_thought('Lorem ipsum dolor sit.', self.auth_user['username'])
+        self.create_thought('consectetur adipiscing.', self.auth_user['username'])
 
         response = self.client.get(
             reverse('thought-list'),
@@ -130,7 +130,7 @@ class ThoughtViewSetTest(TestCase):
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
 
     def test_should_read_thought(self):
-        thought = create_thought(
+        thought = self.create_thought(
             'Adipiscing ipsum dolor sit.',
             self.auth_user['username']
         )
