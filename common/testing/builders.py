@@ -37,8 +37,8 @@ class UserBuilder:
     def _as_json(self) -> dict:
         return {
             'username': self.user.username,
-            'first_name': self.user.first_name,
-            'last_name': self.user.last_name,
+            'firstName': self.user.first_name,
+            'lastName': self.user.last_name,
             'email': self.user.email,
             'password': self.user.password
         }

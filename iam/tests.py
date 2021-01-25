@@ -1,3 +1,4 @@
+import json
 from typing import Union
 
 from django.contrib.auth.hashers import is_password_usable
@@ -27,21 +28,21 @@ class UserViewSetTest(AuthenticableTestMixin):
 
     def assert_response_user(self, expected: Union[dict, User], actual: dict):
         if isinstance(expected, User):
-            self.assertEqual(expected.first_name, actual['first_name'])
-            self.assertEqual(expected.last_name, actual['last_name'])
+            self.assertEqual(expected.first_name, actual['firstName'])
+            self.assertEqual(expected.last_name, actual['lastName'])
             self.assertEqual(expected.username, actual['username'])
             self.assertEqual(expected.email, actual['email'])
         elif isinstance(expected, dict):
-            self.assertEqual(expected['first_name'], actual['first_name'])
-            self.assertEqual(expected['last_name'], actual['last_name'])
+            self.assertEqual(expected['firstName'], actual['firstName'])
+            self.assertEqual(expected['lastName'], actual['lastName'])
             self.assertEqual(expected['username'], actual['username'])
             self.assertEqual(expected['email'], actual['email'])
         else:
             ValueError('expected should be an instance de user or dict')
 
     def assert_persisted_user(self, expected: dict, actual: User):
-        self.assertEqual(expected['first_name'], actual.first_name)
-        self.assertEqual(expected['last_name'], actual.last_name)
+        self.assertEqual(expected['firstName'], actual.first_name)
+        self.assertEqual(expected['lastName'], actual.last_name)
         self.assertEqual(expected['username'], actual.username)
         self.assertEqual(expected['email'], actual.email)
         self.assertEqual(78, len(actual.password))
@@ -57,9 +58,10 @@ class UserViewSetTest(AuthenticableTestMixin):
         url = reverse('user-list')
 
         response = self.client.post(url, user_data, format='json')
+        response_json = json.loads(response.rendered_content.decode())
 
         self.assertEqual(status.HTTP_201_CREATED, response.status_code)
-        self.assert_response_user(user_data, response.data)
+        self.assert_response_user(user_data, response_json)
         persisted_user = User.objects.get()
         self.assert_persisted_user(user_data, persisted_user)
 
@@ -115,9 +117,9 @@ class UserViewSetTest(AuthenticableTestMixin):
         self.authenticate_user(user, '123456')
 
         response = self.client.get(url, format='json')
-
+        response_json = json.loads(response.rendered_content.decode())
         self.assertEqual(status.HTTP_200_OK, response.status_code)
-        self.assert_response_user(user, response.data)
+        self.assert_response_user(user, response_json)
 
     def test_should_not_get_user_info_when_not_authenticated(self):
         url = reverse('user-detail', kwargs={'pk': 1})
