@@ -1,5 +1,6 @@
 from django.urls import path
 
+from sharethoughts import views
 from sharethoughts.views import ThoughtListView, ThoughtDetailView
 
 urlpatterns = [
