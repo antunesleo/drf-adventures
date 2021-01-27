@@ -1,9 +1,10 @@
 from django.urls import path
+from rest_framework.urlpatterns import format_suffix_patterns
 
-from sharethoughts import views
 from sharethoughts.views import ThoughtListView, ThoughtDetailView
 
-urlpatterns = [
+
+urlpatterns = format_suffix_patterns([
     path(
         'api/thoughts',
         ThoughtListView.as_view(),
@@ -14,4 +15,4 @@ urlpatterns = [
         ThoughtDetailView.as_view(),
         name='thought-detail'
     )
-]
+])
