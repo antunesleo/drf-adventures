@@ -38,18 +38,9 @@ class ThoughtBuilder:
 
 class ThoughtCaseMixin(TestCase):
 
-    def assert_thought(
-      self,
-      expected: Union[Thought, dict],
-      actual: Union[Thought, dict]
-    ):
-        expected_thought = expected['thought'] if isinstance(expected, dict) else expected.thought
-        actual_thought = actual['thought'] if isinstance(actual, dict) else actual.thought
-        expected_username = expected['username'] if isinstance(expected, dict) else expected.owner.username
-        actual_username = expected['username'] if isinstance(actual, dict) else actual.owner.username
-
-        self.assertEqual(expected_thought, actual_thought)
-        self.assertEqual(expected_username, actual_username)
+    def assert_response_thought(self, expected: dict, actual: dict):
+        self.assertEqual(expected['thought'], actual['thought'])
+        self.assertEqual(expected['user']['username'], actual['user']['username'])
 
 
 class ThoughtViewSetTest(ThoughtCaseMixin, AuthenticableTestMixin):
@@ -77,14 +68,15 @@ class ThoughtViewSetTest(ThoughtCaseMixin, AuthenticableTestMixin):
         self.assertEqual(1, Thought.objects.count())
         expected_thought = {
             'thought': data['thought'],
-            'username': user.username
+            'user': {'username': user.username}
         }
-        self.assert_thought(
+        self.assert_response_thought(
             expected_thought,
             response.data
         )
         thought = Thought.objects.get()
-        self.assert_thought(expected_thought, thought)
+        self.assertEqual(expected_thought['thought'], thought.thought)
+        self.assertEqual(expected_thought['user']['username'], thought.owner.username)
 
     def test_should_no_publish_a_thought_bigger_than_800_characters(self):
         user = UserBuilder().with_first_name('Bren') \
@@ -140,17 +132,17 @@ class ThoughtViewSetTest(ThoughtCaseMixin, AuthenticableTestMixin):
 
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         self.assertEqual(len(response.data['results']), 2)
-        self.assert_thought(
+        self.assert_response_thought(
             {
                 'thought': 'Lorem ipsum dolor sit.',
-                'username': second_user.username
+                'user': {'username': second_user.username}
             },
             response.data['results'][0]
         )
-        self.assert_thought(
+        self.assert_response_thought(
             {
                 'thought': 'consectetur adipiscing.',
-                'username': second_user.username
+                'user': {'username': second_user.username}
             },
             response.data['results'][1]
         )
@@ -179,10 +171,10 @@ class ThoughtViewSetTest(ThoughtCaseMixin, AuthenticableTestMixin):
         )
 
         self.assertEqual(status.HTTP_200_OK, response.status_code)
-        self.assert_thought(
+        self.assert_response_thought(
             {
                 'thought': 'Adipiscing ipsum dolor sit.',
-                'username': user.username
+                'user': {'username': user.username}
             },
             response.data
         )

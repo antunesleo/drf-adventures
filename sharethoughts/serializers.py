@@ -16,15 +16,10 @@ class ThoughtSerializer(serializers.HyperlinkedModelSerializer):
     thought = serializers.CharField(max_length=800)
     created_at = serializers.DateTimeField(read_only=True)
     user = UserSerializer(source='owner', read_only=True)
-    username = serializers.SlugRelatedField(
-        source='owner',
-        read_only=True,
-        slug_field='username'
-    )
     url = serializers.HyperlinkedIdentityField('thought-detail')
 
     class Meta:
-        fields = ['thought', 'created_at', 'username', 'user', 'url']
+        fields = ['thought', 'created_at', 'user', 'url']
         model = Thought
 
     def create(self, validated_data):
