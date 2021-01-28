@@ -8,7 +8,8 @@ from rest_framework.test import APIClient
 
 from common.testing.builders import UserBuilder
 from common.testing.testcase_mixins import AuthenticableTestMixin
-from sharethoughts.models import Thought
+from sharethoughts.hashtags import unique_hashtags
+from sharethoughts.models import Thought, Hashtag
 
 
 class ThoughtBuilder:
@@ -84,6 +85,84 @@ class ThoughtViewSetTest(ThoughtCaseMixin, AuthenticableTestMixin):
         thought = Thought.objects.get()
         self.assertEqual(expected_thought['thought'], thought.thought)
         self.assertEqual(expected_thought['user']['username'], thought.owner.username)
+
+    def test_should_publish_a_thought_with_hashtags(self):
+        user = UserBuilder().with_first_name('Bren') \
+                            .with_last_name('Magro') \
+                            .with_username('breninho') \
+                            .with_email('brenoninho@breno.com') \
+                            .with_password('123456') \
+                            .build()
+        user.save()
+        self.authenticate_user(user, '123456')
+        data = {'thought': '''Lorem ipsum dolor sit. #FelisArcu #atluctus.'''}
+
+        url = reverse('thought-list')
+        self.client.request()
+        response = self.client.post(url, data, format='json')
+
+        self.assertEqual(status.HTTP_201_CREATED, response.status_code)
+        self.assertEqual(1, Thought.objects.count())
+        expected_thought = {
+            'thought': data['thought'],
+            'user': {'username': user.username}
+        }
+        self.assert_response_thought(
+            expected_thought,
+            response.data
+        )
+        thought = Thought.objects.get()
+        self.assertEqual(expected_thought['thought'], thought.thought)
+        self.assertEqual(expected_thought['user']['username'], thought.owner.username)
+
+        hashtags = Hashtag.objects.filter(thoughts=thought)
+        self.assertEqual(len(hashtags), 2)
+        self.assertEqual(hashtags[0].hashtag, 'FelisArcu')
+        self.assertEqual(hashtags[0].creator, thought.owner)
+        self.assertEqual(hashtags[0].thoughts.all()[0], thought)
+        self.assertEqual(hashtags[1].hashtag, 'atluctus')
+        self.assertEqual(hashtags[1].creator, thought.owner)
+        self.assertEqual(hashtags[1].thoughts.all()[0], thought)
+
+    def test_should_publish_a_thought_with_hashtags_that_already_exists(self):
+        user = UserBuilder().with_first_name('Bren') \
+                            .with_last_name('Magro') \
+                            .with_username('breninho') \
+                            .with_email('brenoninho@breno.com') \
+                            .with_password('123456') \
+                            .build()
+        user.save()
+        hashtag = Hashtag(hashtag='FelisArcu', creator=user)
+        hashtag.save()
+        self.authenticate_user(user, '123456')
+        data = {'thought': '''Lorem ipsum dolor sit. #FelisArcu #atluctus.'''}
+
+        url = reverse('thought-list')
+        self.client.request()
+        response = self.client.post(url, data, format='json')
+
+        self.assertEqual(status.HTTP_201_CREATED, response.status_code)
+        self.assertEqual(1, Thought.objects.count())
+        expected_thought = {
+            'thought': data['thought'],
+            'user': {'username': user.username}
+        }
+        self.assert_response_thought(
+            expected_thought,
+            response.data
+        )
+        thought = Thought.objects.get()
+        self.assertEqual(expected_thought['thought'], thought.thought)
+        self.assertEqual(expected_thought['user']['username'], thought.owner.username)
+
+        hashtags = Hashtag.objects.filter(thoughts=thought)
+        self.assertEqual(len(hashtags), 2)
+        self.assertEqual(hashtags[0].hashtag, 'FelisArcu')
+        self.assertEqual(hashtags[0].creator, thought.owner)
+        self.assertEqual(hashtags[0].thoughts.all()[0], thought)
+        self.assertEqual(hashtags[1].hashtag, 'atluctus')
+        self.assertEqual(hashtags[1].creator, thought.owner)
+        self.assertEqual(hashtags[1].thoughts.all()[0], thought)
 
     def test_should_no_publish_a_thought_bigger_than_800_characters(self):
         user = UserBuilder().with_first_name('Bren') \
@@ -185,3 +264,38 @@ class ThoughtViewSetTest(ThoughtCaseMixin, AuthenticableTestMixin):
             },
             response.data
         )
+
+
+class HashtagsTest(TestCase):
+
+    def test_unique_hashtags_should_get_hashtags_in_text(self):
+        hashtags = unique_hashtags('Aliquam varius, dui in bibendum eleifend. #Ipsum')
+        self.assertEqual(len(hashtags), 1)
+        self.assertEqual(hashtags[0], 'Ipsum')
+
+    def test_unique_hashtags_should_return_empty_list_when_text_doesnot_have_hashtags(self):
+        hashtags = unique_hashtags('Aliquam varius, dui in bibendum eleifend.')
+        self.assertEqual(hashtags, [])
+
+    def test_unique_hashtags_should_get_when_hashtags_doesnot_have_spaces_between_them(self):
+        hashtags = unique_hashtags('Aliquam varius, dui in bibendum eleifend. #Lorem#Ipsum')
+        self.assertEqual(len(hashtags), 2)
+        self.assertEqual(hashtags[0], 'Lorem')
+        self.assertEqual(hashtags[1], 'Ipsum')
+
+    def test_unique_hashtags_should_get_with_numbers(self):
+        hashtags = unique_hashtags('Aliquam varius, dui in bibendum eleifend. #Lorem25')
+        self.assertEqual(len(hashtags), 1)
+        self.assertEqual(hashtags[0], 'Lorem25')
+
+    def test_unique_hashtags_should_not_get_with_special_characters(self):
+        hashtags = unique_hashtags('Aliquam varius,#@!efdsa #Lorem25. #Lorem26! dui in bibendum eleifend.')
+        self.assertEqual(len(hashtags), 2)
+        self.assertEqual(hashtags[0], 'Lorem25')
+        self.assertEqual(hashtags[1], 'Lorem26')
+
+    def test_unique_hashtags_should_discard_repeated_hashtags(self):
+        hashtags = unique_hashtags('Aliquam varius #Lorem#Ipsum #Lorem#Ipsum #Lorem#Ipsum')
+        self.assertEqual(len(hashtags), 2)
+        self.assertEqual(hashtags[0], 'Lorem')
+        self.assertEqual(hashtags[1], 'Ipsum')
