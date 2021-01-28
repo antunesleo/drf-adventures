@@ -43,6 +43,13 @@ class ThoughtCaseMixin(TestCase):
         self.assertEqual(expected['user']['username'], actual['user']['username'])
 
 
+class ThoughtTest(TestCase):
+
+    def test_str_representation(self):
+        thought = Thought(thought='Lorem ipsum Trenison')
+        self.assertEqual('Lorem ipsum Trenison', str(thought), )
+
+
 class ThoughtViewSetTest(ThoughtCaseMixin, AuthenticableTestMixin):
 
     def setUp(self) -> None:
