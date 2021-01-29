@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from rest_framework import generics, status
@@ -23,6 +24,10 @@ class ThoughtListView(generics.ListCreateAPIView):
                 'message': 'You must filter by an username'
             }
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+    @transaction.atomic
+    def create(self, request, *args, **kwargs):
+        return super(ThoughtListView, self).create(request, *args, **kwargs)
 
     def get_queryset(self):
         username = self.request.query_params.get('username', None)
