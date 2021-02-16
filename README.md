@@ -3,6 +3,7 @@ Exploring Django Rest Framework features
 
 ## Pre-reqs
     $ python3.8
+    $ sqlite
 
 ## Setting up
 
