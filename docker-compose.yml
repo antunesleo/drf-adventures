@@ -1,0 +1,45 @@
+version: '3'
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python manage.py runserver 0.0.0.0:8000
+    container_name: web
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/app
+    depends_on:
+      - redis
+    networks:
+      - drf-adventures-network
+
+  redis:
+    image: "redis:latest"
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - drf-adventures-network
+
+  celery-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: celery-worker
+    command: celery -A drfadventures worker -l DEBUG
+    volumes:
+      - ./:/app
+    depends_on:
+      - redis
+    networks:
+      - drf-adventures-network
+
+volumes:
+  redis_data:
+
+networks:
+  drf-adventures-network:
+    driver: bridge
