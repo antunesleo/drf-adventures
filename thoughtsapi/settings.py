@@ -9,8 +9,12 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
+import os
 from datetime import timedelta
 from pathlib import Path
+
+
+ENV = os.environ.get("ENV", "local")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,9 +27,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = '7b@b&^aupju_hx)t6x=4bby4gb=a)=_8=_73whagn-8@^7(uc%'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DEBUG", None) == "1"
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ["ALLOWED_HOSTS"].split(",")
 
 
 # Application definition
