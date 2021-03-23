@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
-from sharethoughts.models import Thought
+from thoughts.models import Thought
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):

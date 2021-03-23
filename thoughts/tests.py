@@ -8,8 +8,8 @@ from rest_framework.test import APIClient
 
 from common.testing.builders import UserBuilder
 from common.testing.testcase_mixins import AuthenticableTestMixin
-from sharethoughts.hashtags import unique_hashtags
-from sharethoughts.models import Thought, Hashtag
+from thoughts.hashtags import unique_hashtags
+from thoughts.models import Thought, Hashtag
 
 
 class ThoughtBuilder:

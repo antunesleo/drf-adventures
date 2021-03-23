@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('sharethoughts', '0002_auto_20210123_2055'),
+        ('thoughts', '0002_auto_20210123_2055'),
     ]
 
     operations = [
@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
                 ('hashtag', models.TextField(editable=False, max_length=100, unique=True)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('creator', models.ForeignKey(editable=False, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
-                ('thoughts', models.ManyToManyField(to='sharethoughts.Thought')),
+                ('thoughts', models.ManyToManyField(to='thoughts.Thought')),
             ],
         ),
     ]

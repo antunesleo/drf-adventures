@@ -7,8 +7,8 @@ from rest_framework.response import Response
 
 
 from iam.exceptions import UsernameError
-from sharethoughts.models import Thought
-from sharethoughts.serializers import ThoughtSerializer
+from thoughts.models import Thought
+from thoughts.serializers import ThoughtSerializer
 
 
 class ThoughtListView(generics.ListCreateAPIView):

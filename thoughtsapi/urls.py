@@ -6,6 +6,6 @@ from thoughtsapi import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.api_root),
-    path('', include('sharethoughts.urls')),
+    path('', include('thoughts.urls')),
     path('', include('iam.urls'))
 ]

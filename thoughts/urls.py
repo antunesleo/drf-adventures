@@ -1,7 +1,7 @@
 from django.urls import path
 from rest_framework.urlpatterns import format_suffix_patterns
 
-from sharethoughts.views import ThoughtListView, ThoughtDetailView
+from thoughts.views import ThoughtListView, ThoughtDetailView
 
 
 urlpatterns = format_suffix_patterns([

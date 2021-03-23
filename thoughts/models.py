@@ -3,7 +3,7 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from sharethoughts.hashtags import unique_hashtags
+from thoughts.hashtags import unique_hashtags
 
 
 class Thought(models.Model):
