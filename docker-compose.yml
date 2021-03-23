@@ -4,7 +4,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: python manage.py runserver 0.0.0.0:8000
+    command: gunicorn thoughtsapi.wsgi --reload -c gunicorn.py
     env_file: .env
     container_name: web
     ports:
@@ -31,6 +31,7 @@ services:
       dockerfile: Dockerfile
     container_name: celery-worker
     command: celery -A thoughtsapi worker -l DEBUG
+    env_file: .env
     volumes:
       - ./:/app
     depends_on:
