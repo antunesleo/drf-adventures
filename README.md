@@ -40,19 +40,19 @@ Exploring Django Rest Framework features
 To show the API usecases the httpie tool will be used, but feel free to use another tool like curl.
 
 ### Create user account
-`$ http POST http://127.0.0.1:8000/api/users/ first_name=Breno last_name=Brenilson email=breno@breno.com username=breno password=breno --json`
+`$ http POST http://localhost:8000/api/users/ first_name=Breno last_name=Brenilson email=breno@breno.com username=breno password=breno --json`
 
 ### Signin by JWT Authentication
-`$ http POST http://127.0.0.1:8000/api/token username=breno password=breno --json`
+`$ http POST http://localhost:8000/api/token username=breno password=breno --json`
 
 ### Refresh token (expires after 5 minutes)
-`$ http POST http://127.0.0.1:8000/api/token/refresh refresh=YOUR_REFRESH_TOKEN --json`
+`$ http POST http://localhost:8000/api/token/refresh refresh=YOUR_REFRESH_TOKEN --json`
 
 ### Publish a thought (requires access token)
- `$ http POST http://127.0.0.1:8000/api/thoughts thought="Como saci faz pra andar de patinete?" "Authorization: Bearer YOUR_ACCESS_TOKEN" --json`
+ `$ http POST http://localhost:8000/api/thoughts thought="Como saci faz pra andar de patinete?" "Authorization: Bearer YOUR_ACCESS_TOKEN" --json`
 
 ### List user's thoughts
-`$ http GET http://127.0.0.1:8000/api/thoughts?username=breno`
+`$ http GET http://localhost:8000/api/thoughts?username=breno`
 
 ### Retrieve a thought
-`$ http GET http://127.0.0.1:8000/api/thoughts/1/`
+`$ http GET http://localhost:8000/api/thoughts/1/`
