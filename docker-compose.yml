@@ -13,7 +13,7 @@ services:
     depends_on:
       - redis
     networks:
-      - drf-adventures-network
+      - thoughts-api-network
 
   redis:
     image: "redis:latest"
@@ -22,24 +22,24 @@ services:
     volumes:
       - redis_data:/data
     networks:
-      - drf-adventures-network
+      - thoughts-api-network
 
   celery-worker:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: celery-worker
-    command: celery -A drfadventures worker -l DEBUG
+    command: celery -A thoughtsapi worker -l DEBUG
     volumes:
       - ./:/app
     depends_on:
       - redis
     networks:
-      - drf-adventures-network
+      - thoughts-api-network
 
 volumes:
   redis_data:
 
 networks:
-  drf-adventures-network:
+  thoughts-api-network:
     driver: bridge

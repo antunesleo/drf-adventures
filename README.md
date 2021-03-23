@@ -1,4 +1,4 @@
-# drf-adventures
+# thoughts-api
 Exploring Django Rest Framework features
 
 ## Pre-reqs
@@ -17,7 +17,7 @@ Exploring Django Rest Framework features
 ### Running
 
     $ python manage.py runserver
-    $ celery -A drfadventures worker -l DEBUG
+    $ celery -A thoughtsapi worker -l DEBUG
 
 ### Running Tests
     $ python3.8 manage.py test

@@ -3,9 +3,9 @@ import os
 from celery import Celery
 
 # set the default Django settings module for the 'celery' program.
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'drfadventures.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'thoughtsapi.settings')
 
-app = Celery('drfadventures')
+app = Celery('thoughtsapi')
 
 # Using a string here means the worker doesn't have to serialize
 # the configuration object to child processes.
