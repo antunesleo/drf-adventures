@@ -12,16 +12,8 @@ services:
     volumes:
       - ./:/app
     depends_on:
+      - aws-local
       - redis
-    networks:
-      - thoughts-api-network
-
-  redis:
-    image: "redis:latest"
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
     networks:
       - thoughts-api-network
 
@@ -35,7 +27,27 @@ services:
     volumes:
       - ./:/app
     depends_on:
+      - aws-local
       - redis
+    networks:
+      - thoughts-api-network
+
+  redis:
+    image: "redis:latest"
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - thoughts-api-network
+
+  aws-local:
+    image: localstack/localstack
+    ports:
+      - 4566
+    environment:
+      - HOSTNAME_EXTERNAL=aws-local
+      - SERVICES=sqs
     networks:
       - thoughts-api-network
 
