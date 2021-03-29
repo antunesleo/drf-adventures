@@ -7,3 +7,5 @@ celery[sqs]
 redis==3.5.3
 gunicorn==20.0.4
 gevent==21.1.2
+psycopg2
+dj-database-url

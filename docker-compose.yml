@@ -14,6 +14,7 @@ services:
     depends_on:
       - aws-local
       - redis
+      - postgres
     networks:
       - thoughts-api-network
 
@@ -29,6 +30,7 @@ services:
     depends_on:
       - aws-local
       - redis
+      - postgres
     networks:
       - thoughts-api-network
 
@@ -51,8 +53,23 @@ services:
     networks:
       - thoughts-api-network
 
+  postgres:
+    image: postgres:10.6
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgresql_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=thoughts
+      - POSTGRES_USER=postgres
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    networks:
+      - thoughts-api-network
+
 volumes:
+  postgresql_data:
   redis_data:
+
 
 networks:
   thoughts-api-network:
