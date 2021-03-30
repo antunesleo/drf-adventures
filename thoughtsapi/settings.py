@@ -153,3 +153,19 @@ CELERY = {
     # Application specific.
     "result_backend": os.environ.get('REDIS_URL', 'redis://redis:6379')
 }
+
+LOGLEVEL = os.environ.get("LOGLEVEL", "INFO")
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "json": {
+            "class": "pythonjsonlogger.jsonlogger.JsonFormatter",
+            "format": "%(asctime) %(name)s %(levelname)s %(module)s %(funcName)s %(lineno)s %(message)s",
+        }
+    },
+    "handlers": {"default": {"class": "logging.StreamHandler", "formatter": "json"}},
+    "loggers": {
+        "": {"handlers": ["default"], "level": LOGLEVEL, "propagate": True},
+    },
+}
