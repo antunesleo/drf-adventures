@@ -141,18 +141,20 @@ REST_FRAMEWORK = {
 }
 
 BROKER_URL = os.environ.get("BROKER_URL", "sqs://")
+
 AWS_SQS_REGION = os.environ.get("AWS_SQS_REGION", "us-east-1")
-CELERY = {
-    # SQS
-    "broker_url": BROKER_URL,
-    "broker_transport_options": {
-        "region": AWS_SQS_REGION,
-        "wait_time_seconds": 20
-    },
-    "worker_prefetch_multiplier": 20,
-    # Application specific.
-    "result_backend": os.environ.get('REDIS_URL', 'redis://redis:6379')
+
+CELERY_BROKER_URL = (os.environ.get("BROKER_URL", "sqs://"),)
+CELERY_BROKER_TRANSPORT_OPTIONS = {
+    "region": AWS_SQS_REGION,
+    "wait_time_seconds": 20,
+    "queue_name_prefix": f"thoughts-celery-",
 }
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_ROUTES = {
+    "iam.tasks.send_confirmation_email": {"queue": "emails"},
+}
+CELERY_RESULT_BACKEND = os.environ.get('REDIS_URL', 'redis://')
 
 LOGLEVEL = os.environ.get("LOGLEVEL", "INFO")
 LOGGING = {

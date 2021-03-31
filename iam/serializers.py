@@ -30,5 +30,5 @@ class UserSerializer(serializers.ModelSerializer):
         user = super(UserSerializer, self).create(validated_data)
         user.set_password(validated_data['password'])
         user.save()
-        send_confirmation_email(user.email)
+        send_confirmation_email.delay(user.email)
         return user

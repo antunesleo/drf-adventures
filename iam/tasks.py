@@ -1,6 +1,6 @@
-from celery import shared_task
+from thoughtsapi.celery import app
 
 
-@shared_task
+@app.task
 def send_confirmation_email(user_email):
     print(f'SENT EMAIL TO {user_email}')

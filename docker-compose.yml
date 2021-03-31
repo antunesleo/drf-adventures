@@ -48,7 +48,6 @@ services:
     ports:
       - 4566
     environment:
-      - HOSTNAME_EXTERNAL=aws-local
       - SERVICES=sqs
     networks:
       - thoughts-api-network
